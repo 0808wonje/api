@@ -2,7 +2,7 @@ from src.user.repository import UserRepository
 from src.user.schemas import UserCreate, UpdateUsername, DeleteUser
 from sqlalchemy.orm import Session
 from src.user.exceptions import UserNotFoundException, DuplicateUsernameException, IncorrectPasswordException
-from src.auth.hashing import hash_password, verify_password
+from src.core.security.hashing import hash_password, verify_password
 
 class UserService:
     def __init__(self, repo: UserRepository):
@@ -24,7 +24,7 @@ class UserService:
             db.rollback()
             raise
 
-    def search_username(self, db: Session, data: str):
+    def get_user(self, db: Session, data: str):
         try:
             user = self.repo.fetch_user_by_username(db, data)
             if user:
@@ -32,7 +32,6 @@ class UserService:
             else:
                 raise UserNotFoundException()
         except Exception:
-            db.rollback()
             raise
 
     def modify_name(self, db: Session, data: UpdateUsername):
