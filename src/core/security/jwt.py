@@ -1,9 +1,9 @@
 from jose import jwt
 from datetime import datetime, timezone, timedelta
 from src.auth.constants import ALG, EXPIRE_MINUTES
+import os
 
-
-secret_key = 'secret'
+secret_key = os.environ['SECRET_KEY']
 
 def create_access_token(data: dict, expires_minutes: int = EXPIRE_MINUTES) -> str:
     to_encode = data.copy()
