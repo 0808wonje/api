@@ -1,6 +1,5 @@
-from src.user.service import UserService
-from src.user.repository import UserRepository
-from src.auth.service import AuthService
+from .service import UserService
+from .repository import UserRepository
 
 
 def get_user_service() -> UserService:

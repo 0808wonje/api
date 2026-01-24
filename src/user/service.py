@@ -1,7 +1,7 @@
-from src.user.repository import UserRepository
-from src.user.schemas import UserCreate, UpdateUsername, DeleteUser
 from sqlalchemy.orm import Session
-from src.user.exceptions import UserNotFoundException, DuplicateUsernameException, IncorrectPasswordException
+from .repository import UserRepository
+from .schemas import UserCreate, UpdateUsername, DeleteUser
+from .exceptions import UserNotFoundException, DuplicateUsernameException, IncorrectPasswordException
 from src.core.security.hashing import hash_password, verify_password
 
 class UserService:

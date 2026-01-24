@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
-from src.user.models import Users
 from datetime import datetime
+from .models import Users
 
 
 class UserRepository:
