@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
-from src.user.models import Users
 from datetime import datetime
+from .models import Users
 
 
 class UserRepository:
@@ -10,18 +10,22 @@ class UserRepository:
         db.add(user)
         return user
     
+    def fetch_user_by_id(self, db: Session, user_id: int) -> Users:
+        user = db.query(Users).filter(Users.id == user_id).one_or_none()
+        return user
+    
     def fetch_user_by_username(self, db: Session, username: str) -> Users:
         user = db.query(Users).filter(Users.username == username).one_or_none()
         return user
 
-    def update_username(self, db: Session, cur_name: str, after_name: str) -> Users:
-        user = db.query(Users).filter(Users.username == cur_name).one_or_none()
+    def update_username(self, db: Session, user_id: int, after_name: str) -> Users:
+        user = db.query(Users).filter(Users.id == user_id).one_or_none()
         user.username = after_name
         user.updated_at = datetime.now()
         return user
     
-    def delete_user(self, db: Session, username: str) -> None:
-        user = db.query(Users).filter(Users.username == username).one_or_none()
+    def delete_user(self, db: Session, user_id: int) -> None:
+        user = db.query(Users).filter(Users.id == user_id).one_or_none()
         db.delete(user)
 
     def is_username_exist(self, db: Session, username: str):

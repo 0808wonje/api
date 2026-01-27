@@ -1,6 +1,6 @@
 from fastapi import Request
 from fastapi.responses import JSONResponse
-from src.user.exceptions import UserNotFoundException, DuplicateUsernameException, IncorrectPasswordException
+from ..user.exceptions import UserNotFoundException, DuplicateUsernameException, IncorrectPasswordException
 
 def user_not_found_handler(request: Request, exc: UserNotFoundException):
     return JSONResponse(

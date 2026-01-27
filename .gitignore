@@ -1,6 +1,5 @@
-.env.*
+.env.api
+.env.db
+.env.local
 .venv/
 __pycache__
-Dockerfile
-compose.yaml
-requirements.txt

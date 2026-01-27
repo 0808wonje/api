@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
 class UserLoginInput(BaseModel):
-    user_id: str
+    username: str
     password: str
 
 class TokenResponse(BaseModel):

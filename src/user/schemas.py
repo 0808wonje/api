@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from datetime import datetime
 
 
@@ -11,16 +11,11 @@ class UserCreateResponse(BaseModel):
     username: str
     age: int
 
-class FindUsername(BaseModel):
-    username: str
-
-class FindUsernameResponse(BaseModel):
+class FindUserResponse(BaseModel):
     username: str
 
 class UpdateUsername(BaseModel):
-    cur_name: str
     after_name: str
-    password: str
 
 class UpdateUsernameResponse(BaseModel):
     username: str

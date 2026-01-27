@@ -1,30 +1,38 @@
-from src.user.repository import UserRepository
-from src.user.schemas import UserCreate, UpdateUsername, DeleteUser
 from sqlalchemy.orm import Session
-from src.user.exceptions import UserNotFoundException, DuplicateUsernameException, IncorrectPasswordException
-from src.core.security.hashing import hash_password, verify_password
+from redis import Redis
+import json
+from .repository import UserRepository
+from .models import Users
+from .schemas import UserCreate, UpdateUsername, DeleteUser
+from .exceptions import UserNotFoundException, DuplicateUsernameException
+from src.core.security.hashing import hash_password
+from ..core.constants import REDIS_TTL_SECONDS
+
+
 
 class UserService:
-    def __init__(self, repo: UserRepository):
+    def __init__(self, db: Session, repo: UserRepository, redis: Redis):
+        self.db = db
         self.repo = repo
+        self.redis = redis
 
-    def create_user(self, db: Session, data: UserCreate):
+    def create_user(self, data: UserCreate):
         try:
-            is_exist = self.repo.is_username_exist(db, data.username)
+            is_exist = self.repo.is_username_exist(self.db, data.username)
             if is_exist:
                 raise DuplicateUsernameException()
             else:
                 values = data.model_dump()
                 values['password_hash'] = hash_password(values['password_hash'])
-                user = self.repo.persist_user(db, values)
-                db.commit()
-                db.refresh(user)
+                user = self.repo.persist_user(self.db, values)
+                self.db.commit()
+                self.db.refresh(user)
                 return user
         except Exception:
-            db.rollback()
+            self.db.rollback()
             raise
-
-    def get_user(self, db: Session, data: str):
+    
+    def get_user_from_db(self, db: Session, data: str) -> Users:
         try:
             user = self.repo.fetch_user_by_username(db, data)
             if user:
@@ -34,32 +42,40 @@ class UserService:
         except Exception:
             raise
 
-    def modify_name(self, db: Session, data: UpdateUsername):
+    def get_user_from_cache_first(self, user_id: int) -> dict:
         try:
-            is_exist = self.repo.is_username_exist(db, data.cur_name)
-            if not is_exist:
-                raise UserNotFoundException()
-            stored_password = self.repo.fetch_user_by_username(db, data.cur_name).password_hash
-            is_verified = verify_password(data.password, stored_password)
-            if not is_verified:
-                raise IncorrectPasswordException()
-            user = self.repo.update_username(db, data.cur_name, data.after_name)
-            db.commit()
-            db.refresh(user)
-            return user
-        except Exception:
-            db.rollback()
-            raise
-
-    def delete_user(self, db: Session, data: DeleteUser) -> bool:
-        try:
-            is_exist = self.repo.is_username_exist(db, data.username)
-            if is_exist:
-                self.repo.delete_user(db, data.username)
-                db.commit()
-                return True
+            cached = self.redis.get(user_id)
+            if cached:
+                return json.loads(cached)
+            user = self.repo.fetch_user_by_id(self.db, user_id)
+            if user:
+                user_dict = json.dumps({
+                    "id" : user.id,
+                    "username" : user.username
+                })
+                self.redis.set(user_id, user_dict, ex=REDIS_TTL_SECONDS)
+                return json.loads(user_dict)
             else:
                 raise UserNotFoundException()
         except Exception:
-            db.rollback()
+            raise
+
+    def modify_name(self, user_id: int, after_name: str):
+        try:
+            user = self.repo.update_username(self.db, user_id, after_name)
+            self.redis.delete(user_id)
+            self.db.commit()
+            self.db.refresh(user)
+            return user
+        except Exception:
+            self.db.rollback()
+            raise
+
+    def delete_user(self, user_id) -> bool:
+        try:
+            self.repo.delete_user(self.db, user_id)
+            self.redis.delete(user_id)
+            self.db.commit()
+        except Exception:
+            self.db.rollback()
             raise

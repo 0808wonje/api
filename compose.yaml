@@ -1,0 +1,41 @@
+services:
+  api:
+    # image: 0808wonje/app
+    build: .
+    ports:
+      - 8000:8000
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file: .env.api
+  
+  redis:
+    image: redis:7.2-alpine
+    restart: always
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+
+
+  db:
+    image: postgres
+    restart: always
+    volumes:
+      - db-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+    env_file: .env.db
+    
+volumes:
+  db-data:
+  redis-data:
