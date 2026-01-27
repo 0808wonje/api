@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from .schemas import *
 from .dependencies import UserService, get_user_service
 from ..auth.dependencies import get_current_user_id
+from ..core.limiter import rate_limit
 
 
 router = APIRouter(
@@ -20,8 +21,8 @@ def join(
 @router.get("/find", response_model=FindUserResponse)
 def find_user(
     service: UserService = Depends(get_user_service),
-    user_id: str =  Depends(get_current_user_id)):
-    print('userid ============== ',user_id)
+    user_id: str =  Depends(get_current_user_id),
+    _: None = Depends(rate_limit)):
     user = service.get_user_from_cache_first(user_id)
     return user
 
