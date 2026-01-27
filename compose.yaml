@@ -7,7 +7,22 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     env_file: .env.api
+  
+  redis:
+    image: redis:7.2-alpine
+    restart: always
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+
 
   db:
     image: postgres
@@ -23,3 +38,4 @@ services:
     
 volumes:
   db-data:
+  redis-data:

@@ -2,16 +2,21 @@ from jose import jwt
 from datetime import datetime, timezone, timedelta
 from ...auth.constants import ALG, EXPIRE_MINUTES
 import os
+import uuid
 
 secret_key = os.environ['SECRET_KEY']
 
-def create_access_token(data: dict, expires_minutes: int = EXPIRE_MINUTES) -> str:
-    to_encode = data.copy()
-    print(f'to_encode ===== {to_encode}')
-    expire = datetime.now(timezone.utc) + timedelta(minutes=expires_minutes)
-    to_encode.update({"exp": expire})
-    print(f'to_encode ===== {to_encode}')
-    return jwt.encode(to_encode, secret_key, algorithm=ALG)
+def create_access_token(user_id: int, expires_minutes: int = EXPIRE_MINUTES) -> str:
+    now = datetime.now(timezone.utc)
+    exp = now + timedelta(minutes=expires_minutes)
+    payload = {
+        "sub" : str(user_id),
+        "iat" : int(now.timestamp()),
+        "exp" : int(exp.timestamp()),
+        "jti" : uuid.uuid4().hex
+
+    }
+    return jwt.encode(payload, secret_key, algorithm=ALG)
 
 def decode_token(token: str) -> dict:
     return jwt.decode(token, secret_key, algorithms=ALG)

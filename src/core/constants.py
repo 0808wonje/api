@@ -1,0 +1,1 @@
+REDIS_TTL_SECONDS = 60 * 3
