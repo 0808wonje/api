@@ -1,33 +1,52 @@
 from sqlalchemy.orm import Session
 from datetime import datetime
-from .models import Users
+from .models import Users, SocialAccount
 
 
 class UserRepository:
+    def __init__(self, db: Session):
+        self.db = db
 
-    def persist_user(self, db: Session, values: dict) -> Users: 
+    def persist_user(self, values: dict) -> Users: 
         user = Users(**values)
-        db.add(user)
+        self.db.add(user)
+        self.db.flush()
         return user
     
-    def fetch_user_by_id(self, db: Session, user_id: int) -> Users:
-        user = db.query(Users).filter(Users.id == user_id).one_or_none()
+    def persist_social_user(self, user: Users, values: dict) -> SocialAccount:
+        social_user = SocialAccount(**values)
+        user.social_accounts.append(social_user)
+        self.db.add(user)
+        self.db.flush()
         return user
     
-    def fetch_user_by_username(self, db: Session, username: str) -> Users:
-        user = db.query(Users).filter(Users.username == username).one_or_none()
+    def fetch_user_by_id(self, user_id: int) -> Users | None:
+        user = self.db.query(Users).filter(Users.id == user_id).one_or_none()
+        return user
+    
+    def fetch_user_by_username(self, username: str) -> Users | None:
+        user = self.db.query(Users).filter(Users.username == username).one_or_none()
+        return user
+    
+    def fetch_social_user_by_provider_id(
+            self, 
+            provider:str,
+            provider_id: str) -> Users | None:
+        user = self.db.query(SocialAccount).filter(
+            SocialAccount.provider == provider, SocialAccount.provider_id == provider_id
+            ).one_or_none()
         return user
 
-    def update_username(self, db: Session, user_id: int, after_name: str) -> Users:
-        user = db.query(Users).filter(Users.id == user_id).one_or_none()
+    def update_username(self, user_id: int, after_name: str) -> Users:
+        user = self.db.query(Users).filter(Users.id == user_id).first()
         user.username = after_name
         user.updated_at = datetime.now()
         return user
     
-    def delete_user(self, db: Session, user_id: int) -> None:
-        user = db.query(Users).filter(Users.id == user_id).one_or_none()
-        db.delete(user)
+    def delete_user(self, user_id: int) -> None:
+        user = self.db.query(Users).filter(Users.id == user_id).first()
+        self.db.delete(user)
 
-    def is_username_exist(self, db: Session, username: str):
-        is_exist = db.query(db.query(Users).filter(Users.username == username).exists()).scalar()
+    def is_username_exist(self, username: str):
+        is_exist = self.db.query(self.db.query(Users).filter(Users.username == username).exists()).scalar()
         return is_exist

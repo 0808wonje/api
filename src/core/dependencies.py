@@ -1,7 +1,9 @@
-from src.core import redis_config
-from redis import Redis
+from fastapi import Request
+from redis.asyncio import Redis
 
-def get_redis() -> Redis:
-    if redis_config.redis_client is None:
+
+def get_redis(request: Request) -> Redis:
+    if request.app.state.redis is None:
         raise RuntimeError("Redis is not initialized")
-    return redis_config.redis_client
+    return request.app.state.redis
+

@@ -4,16 +4,16 @@ from ...auth.constants import ALG, EXPIRE_MINUTES
 import os
 import uuid
 
-secret_key = os.environ['SECRET_KEY']
+secret_key = os.environ['JWT_SECRET_KEY']
 
 def create_access_token(user_id: int, expires_minutes: int = EXPIRE_MINUTES) -> str:
     now = datetime.now(timezone.utc)
     exp = now + timedelta(minutes=expires_minutes)
     payload = {
-        "sub" : str(user_id),
-        "iat" : int(now.timestamp()),
-        "exp" : int(exp.timestamp()),
-        "jti" : uuid.uuid4().hex
+        "sub" : str(user_id), #subject
+        "iat" : int(now.timestamp()), #issued at
+        "exp" : int(exp.timestamp()), # expire in
+        "jti" : uuid.uuid4().hex #jwt id
 
     }
     return jwt.encode(payload, secret_key, algorithm=ALG)
