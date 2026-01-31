@@ -14,12 +14,17 @@ from src.user.repository import UserRepository
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
 
-def get_current_user_id(token: str = Depends(oauth2_scheme)) -> str:
+async def get_current_user_id(
+        token: str = Depends(oauth2_scheme),
+        redis: Redis = Depends(get_redis)) -> str:
     try:
         payload = decode_token(token)
         user_id = payload.get("sub")
-        if user_id is None:
+        jti = payload.get("jti")
+        if user_id is None or not jti:
             raise HTTPException(status_code=401, detail="Invalid token")
+        if await redis.get(f"jwt:blacklist:{jti}") is not None:
+            raise HTTPException(status_code=401, detail="Token revoked")
         return user_id
     except (JWTError, ExpiredSignatureError, ValueError):
         raise HTTPException(
@@ -31,5 +36,5 @@ def get_current_user_id(token: str = Depends(oauth2_scheme)) -> str:
 def get_auth_service(
     db: Session = Depends(get_db),
     redis: Redis = Depends(get_redis)) -> AuthService:
-    user_repo = UserRepository()
-    return AuthService(db, user_repo, redis)
+    user_repo = UserRepository(db)
+    return AuthService(user_repo, redis)

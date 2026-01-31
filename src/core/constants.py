@@ -1,4 +1,4 @@
-# Redis Relative
+# Redis Relative Configuration
 REDIS_TTL_SECONDS = 60 * 5
 RATE_LIMIT = 5
 WINDOW_SECONDS = 60 * 3

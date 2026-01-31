@@ -10,4 +10,4 @@ from sqlalchemy.orm import Session
 def get_user_service(
         db: Session = Depends(get_db),
         redis: Redis = Depends(get_redis)) -> UserService:
-        return UserService(db, UserRepository(), redis)
+        return UserService(UserRepository(db), redis)

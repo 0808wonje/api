@@ -1,25 +1,26 @@
 import time
-from fastapi import Depends, HTTPException, status
-from redis import Redis
+from fastapi import Depends, HTTPException, status, Request
+from redis.asyncio import Redis
 from src.core.dependencies import get_redis
 from src.auth.dependencies import get_current_user_id
 from .constants import RATE_LIMIT, WINDOW_SECONDS
 
 
-def rate_limit(
+async def rate_limit(
+    request: Request,
     user_id: str = Depends(get_current_user_id),
-    r: Redis = Depends(get_redis),
-):
+    r: Redis = Depends(get_redis)):
+    router_name = request.scope['route'].name
     now = int(time.time())
     window = now // WINDOW_SECONDS
-    key = f"rate:mail:{user_id}:{window}"
+    key = f"limit:{router_name}:{user_id}:{window}"
 
-    count = r.incr(key)
+    count = await r.incr(key)
     if count == 1:
-        r.expire(key, WINDOW_SECONDS)
+        await r.expire(key, WINDOW_SECONDS)
 
     if count > RATE_LIMIT:
-        ttl = r.ttl(key)
+        ttl = await r.ttl(key)
         if ttl < 0:
             ttl = WINDOW_SECONDS
 

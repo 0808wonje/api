@@ -1,14 +1,16 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, EmailStr
 from datetime import datetime
 
 
 class UserCreate(BaseModel):
-    username: str
-    password_hash: str
-    age: int | None
+    username: str | None = None
+    password_hash: str | None = None
+    email: EmailStr | None = None
+    age: int | None = None
 
 class UserCreateResponse(BaseModel):
     username: str
+    email: EmailStr
     age: int
 
 class FindUserResponse(BaseModel):

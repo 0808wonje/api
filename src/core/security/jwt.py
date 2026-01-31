@@ -10,10 +10,10 @@ def create_access_token(user_id: int, expires_minutes: int = EXPIRE_MINUTES) -> 
     now = datetime.now(timezone.utc)
     exp = now + timedelta(minutes=expires_minutes)
     payload = {
-        "sub" : str(user_id),
-        "iat" : int(now.timestamp()),
-        "exp" : int(exp.timestamp()),
-        "jti" : uuid.uuid4().hex
+        "sub" : str(user_id), #subject
+        "iat" : int(now.timestamp()), #issued at
+        "exp" : int(exp.timestamp()), # expire in
+        "jti" : uuid.uuid4().hex #jwt id
 
     }
     return jwt.encode(payload, secret_key, algorithm=ALG)
