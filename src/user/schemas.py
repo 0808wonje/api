@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, ConfigDict
 from datetime import datetime
 
 
@@ -12,22 +12,23 @@ class UserCreateResponse(BaseModel):
     username: str
     email: EmailStr
     age: int
+    created_at: datetime
 
 class FindUserResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
     username: str
-
-class UpdateUsername(BaseModel):
-    after_name: str
-
-class UpdateUsernameResponse(BaseModel):
-    username: str
+    age: int
+    email: EmailStr
+    created_at: datetime
     updated_at: datetime
 
+class UpdateUserProfile(BaseModel):
+    username: str | None = None
+    email: EmailStr | None = None
+    age: int | None = None
+
 class UpdateUsernameResponse(BaseModel):
     username: str
-
-class DeleteUser(BaseModel):
-    username: str
-
-class DeleteUserResponse(BaseModel):
-    msg: str
+    email: EmailStr
+    age: int
+    updated_at: datetime

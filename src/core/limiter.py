@@ -5,12 +5,12 @@ from src.core.dependencies import get_redis
 from src.auth.dependencies import get_current_user_id
 from .constants import RATE_LIMIT, WINDOW_SECONDS
 
-
 async def rate_limit(
     request: Request,
     user_id: str = Depends(get_current_user_id),
     r: Redis = Depends(get_redis)):
     router_name = request.scope['route'].name
+    #Fixed Window Rate Limit
     now = int(time.time())
     window = now // WINDOW_SECONDS
     key = f"limit:{router_name}:{user_id}:{window}"
