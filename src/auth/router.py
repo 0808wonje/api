@@ -11,13 +11,13 @@ router = APIRouter(
     tags=['Auth']
 )
 
-@router.post("/login", response_model=TokenResponse)
+@router.post("/login", response_model=TokenResponse, status_code=302)
 def local_login(
     data: UserLoginInput,
     service: AuthService = Depends(get_auth_service)):
     return service.procede_local_login(data)
 
-@router.post("/logout")
+@router.post("/logout", status_code=302)
 async def logout(
     service: AuthService = Depends(get_auth_service),
     user_id = Depends(get_current_user_id),
@@ -41,20 +41,21 @@ async def social_login(provider:str, request: Request):
     redirect_uri = str(request.url_for("social_callback", provider=provider))
     return await client.authorize_redirect(request, redirect_uri)
 
-@router.get("/{provider}/callback", name="social_callback")
+@router.get("/{provider}/callback", name="social_callback", status_code=302)
 async def social_callback(
     provider:str,
     request: Request,
     service: AuthService = Depends(get_auth_service)):
     client = getattr(request.app.state.oauth, provider)
     token = await client.authorize_access_token(request)
-    if provider == 'google':
-        pass
     userinfo = token['userinfo']
-    data = SocialLoginInput(
-        provider=provider,
-        provider_id=userinfo['sub'],
-        social_email=userinfo['email'])
+    if provider == 'google':
+        data = SocialLoginInput(
+            provider=provider,
+            provider_id=userinfo['sub'],
+            social_email=userinfo['email'])
+    if provider == 'kakao':
+        pass    
     return service.procede_social_login(data)
     
 

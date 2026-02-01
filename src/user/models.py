@@ -1,7 +1,7 @@
 from __future__ import annotations
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from sqlalchemy import String, Integer, DateTime, BigInteger, UniqueConstraint, Index, Text, ForeignKey
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 class Base(DeclarativeBase):
@@ -19,7 +19,7 @@ class Users(Base):
     password_hash: Mapped[str] = mapped_column(String(255), nullable=True) 
     email: Mapped[str] = mapped_column(String(255), nullable=True)
     age: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now(timezone.utc))
     updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
 
     social_accounts: Mapped[list[SocialAccount]] = relationship(

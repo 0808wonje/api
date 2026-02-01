@@ -14,6 +14,7 @@ from src.user.repository import UserRepository
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
 
+#For check JWT is in blacklist and earn user_id
 async def get_current_user_id(
         token: str = Depends(oauth2_scheme),
         redis: Redis = Depends(get_redis)) -> str:

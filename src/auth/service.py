@@ -16,7 +16,7 @@ class AuthService:
         self.redis = redis
 
     def procede_local_login(self, data: UserLoginInput) -> dict:
-        user = self.user_port.fetch_user_by_username(data.username)
+        user = self.user_port.get_by_username(data.username)
         if not user:
             raise UserNotFoundException
         is_verified = verify_password(data.password, user.password_hash) 
@@ -30,12 +30,12 @@ class AuthService:
             raise IncorrectPasswordException()  
     
     def procede_social_login(self, data: SocialLoginInput) -> dict:
-        user = self.user_port.fetch_social_user_by_provider_id(data.provider, data.provider_id)
+        user = self.user_port.get_social_user_by_provider_id(data.provider, data.provider_id)
         if not user:
             user_value = UserCreate().model_dump()
-            user = self.user_port.persist_user(user_value)
+            user = self.user_port.add(user_value)
             social_user_values = data.model_dump()
-            self.user_port.persist_social_user(user, social_user_values)
+            self.user_port.add_social_user(user, social_user_values)
         return {
                 'access_token' : self._issue_token(user.id),
                 'token_type' : 'bearer',
