@@ -49,8 +49,11 @@ async def webhook_send(request: Request):
             "X-Timestamp": timestamp,
             "Content-Type": "application/json"
         }
-        await asyncio.sleep(10)
-        async with httpx.AsyncClient(timeout=10.0) as client:
+        await asyncio.sleep(3)
+        async with httpx.AsyncClient(
+            timeout=10.0,
+            follow_redirects=True,
+            verify=False) as client:
             await client.post(url=data['callback_url'], content=body, headers=headers)
     asyncio.create_task(_do_send())
     return {"ok": True, "scheduled": True, "event_id": event_id}

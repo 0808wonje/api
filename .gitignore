@@ -1,5 +1,6 @@
+.venv/
+__pycache__
 .env.api
 .env.db
 .env.local
-.venv/
-__pycache__
+
