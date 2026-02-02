@@ -22,7 +22,6 @@ JWT 기반 인증, Redis 캐시 및 Rate Limit, Webhook 보안 검증(HMAC), OAu
 | Cache | Redis |
 | Auth | JWT, OAuth |
 | Infra | Docker, Docker Compose, Nginx |
-| Security | HMAC Webhook Signature |
 
 ## Features
 
@@ -40,10 +39,9 @@ JWT 기반 인증, Redis 캐시 및 Rate Limit, Webhook 보안 검증(HMAC), OAu
 ### Caching
 - DB 데이터 캐싱 by Redis
 
+## Focused On
 
-## What I Focused On
-
-- 단순 CRUD가 아닌 **실서비스 구조**를 목표로 설계
+- 단순 CRUD가 아닌 실서비스 구조를 목표로 설계
 - JWT 강제 만료를 위해 Redis 블랙리스트 도입
 - API 남용 방지를 위한 Rate Limit 구현
 - Webhook 위변조 방지를 위한 HMAC 검증 로직 구현
