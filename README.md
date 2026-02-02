@@ -2,7 +2,7 @@
 
 JWT 기반 인증, Redis 캐시 및 Rate Limit, Webhook 보안 검증(HMAC), OAuth 소셜 로그인을 포함하여 실서비스 구조를 고려한 FastAPI 백엔드 서버입니다.
 
-## 🏗 Architecture
+## Architecture
 
 ![architecture](./docs/architecture.svg)
 
